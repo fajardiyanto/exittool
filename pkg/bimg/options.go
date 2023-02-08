@@ -254,4 +254,5 @@ type Options struct {
 	// private fields
 	autoRotateOnly    bool
 	RemoveAllMetaData bool
+	PageNum           int
 }

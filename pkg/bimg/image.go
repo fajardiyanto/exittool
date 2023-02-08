@@ -218,6 +218,12 @@ func (i *Image) Metadata() (ImageMetadata, error) {
 	return Metadata(i.buffer)
 }
 
+// ConvertPage converts the specified page from a multi-page image to another format.
+func (i *Image) ConvertPage(t ImageType, page int) ([]byte, error) {
+	options := Options{Type: t, PageNum: page}
+	return i.Process(options)
+}
+
 // Interpretation gets the image interpretation type.
 // See: https://libvips.github.io/libvips/API/current/VipsImage.html#VipsInterpretation
 func (i *Image) Interpretation() (Interpretation, error) {
