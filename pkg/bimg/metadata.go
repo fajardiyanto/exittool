@@ -6,7 +6,7 @@ package bimg
 */
 import "C"
 import (
-	"errors"
+	"fmt"
 	"unsafe"
 )
 
@@ -165,6 +165,7 @@ func ImageInterpretation(buf []byte) (Interpretation, error) {
 
 func applyRemoveAllMetadata(image *C.VipsImage) (*C.VipsImage, error) {
 	for _, s := range vipsGetAllMetadataKey(image) {
+		fmt.Println("metadata => ", s)
 		cstr := C.CString(s)
 		C.vips_image_remove(image, cstr)
 		C.free(unsafe.Pointer(cstr))
@@ -253,56 +254,4 @@ func Metadata(buf []byte) (ImageMetadata, error) {
 	}
 
 	return metadata, nil
-}
-
-func ProcessRemoveMetadata(buf []byte, o Options) ([]byte, error) {
-	defer C.vips_thread_shutdown()
-
-	image, imageType, err := loadImage(buf)
-	if err != nil {
-		return nil, err
-	}
-
-	o = applyDefaults(o, imageType)
-
-	if !IsTypeSupportedSave(o.Type) {
-		return nil, errors.New("unsupported image output type")
-	}
-
-	inWidth := int(image.Xsize)
-	inHeight := int(image.Ysize)
-
-	// Infer the required operation based on the in/out image sizes for a coherent transformation
-	normalizeOperation(&o, inWidth, inHeight)
-
-	// image calculations
-	factor := imageCalculations(&o, inWidth, inHeight)
-	shrink := calculateShrink(factor, o.Interpolator)
-	residual := calculateResidual(factor, shrink)
-
-	// Do not enlarge the output if the input width or height
-	// are already less than the required dimensions
-	if !o.Enlarge && !o.Force {
-		if inWidth < o.Width && inHeight < o.Height {
-			o.Width = inWidth
-			o.Height = inHeight
-		}
-	}
-
-	// Transform image, if necessary
-	if shouldTransformImage(o, inWidth, inHeight) {
-		image, err = transformImage(image, o, shrink, residual)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if o.RemoveAllMetaData {
-		image, err = applyRemoveAllMetadata(image)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return saveImage(image, o)
 }

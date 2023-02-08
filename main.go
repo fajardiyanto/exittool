@@ -5,11 +5,11 @@ import (
 	"log"
 	"os"
 
-	"github.com/fajarardiyanto/steganography/vendor/bimg"
+	"github.com/fajarardiyanto/steganography/pkg/bimg"
 	"github.com/signintech/pdft"
 )
 
-const inputFile = "file/input.jpg"
+const inputFile = "file/input.pdf"
 const destTwo = "file/inject_two.jpg"
 
 func main() {
@@ -21,13 +21,13 @@ func ImgToPDF() {
 	var pt pdft.PDFt
 	err := pt.Open(inputFile)
 	if err != nil {
-		log.Println(err.Error())
+		log.Printf("error open file: %v", err)
 		return
 	}
 
 	err = pt.Save(destTwo)
 	if err != nil {
-		log.Println(err.Error())
+		log.Printf("error saving file: %v", err)
 		return
 	}
 }
@@ -75,14 +75,16 @@ func removeMetadata() {
 		StripMetadata:     true,
 		NoProfile:         true,
 		Embed:             true,
-		Compression:       9, Quality: 50})
+		Compression:       9,
+		Quality:           50,
+	})
 	if err != nil {
-		log.Printf("error: %v", err)
+		log.Printf("error processing data: %v", err)
 		return
 	}
 
 	if err = bimg.Write(destTwo, dat); err != nil {
-		log.Printf("error write file image two: %v", err)
+		log.Printf("error write file image: %v", err)
 		return
 	}
 }

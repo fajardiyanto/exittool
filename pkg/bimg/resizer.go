@@ -171,7 +171,7 @@ func loadImage(buf []byte) (*C.VipsImage, ImageType, error) {
 
 	image, imageType, err := vipsRead(buf)
 	if err != nil {
-		return nil, JPEG, err
+		return nil, PDF, err
 	}
 
 	return image, imageType, nil

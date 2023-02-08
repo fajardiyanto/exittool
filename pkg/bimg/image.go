@@ -213,15 +213,6 @@ func (i *Image) Process(o Options) ([]byte, error) {
 	return image, nil
 }
 
-func (i *Image) ProcessMetadata(o Options) ([]byte, error) {
-	image, err := RemoveMetaData(i.buffer, o)
-	if err != nil {
-		return nil, err
-	}
-	i.buffer = image
-	return image, nil
-}
-
 // Metadata returns the image metadata (size, alpha channel, profile, EXIF rotation).
 func (i *Image) Metadata() (ImageMetadata, error) {
 	return Metadata(i.buffer)
