@@ -16,6 +16,10 @@ ARG BUILD_DATE
 
 RUN mkdir /build
 
+
+COPY --from=builder /build/document-service.app /build
+COPY --from=builder /build/key.json /build/key.json
+
 WORKDIR /build
 
 ENTRYPOINT ["./document-service.app"]

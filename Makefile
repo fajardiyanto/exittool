@@ -7,7 +7,7 @@ run:
 build:
 	@go build \
 		-ldflags "-X main.buildName=document-service -X main.buildVersion=`git rev-parse --short HEAD`" \
-		-o document-service.app cmd/api/main.go
+		-o document-service.app main.go
 
 docker-build:
 	@docker build -f Dockerfile -t "document-service:1.0" --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" .

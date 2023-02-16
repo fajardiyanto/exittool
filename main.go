@@ -1,84 +1,32 @@
 package main
 
 import (
-	"fmt"
+	"github.com/fajarardiyanto/steganography/config"
+	"github.com/fajarardiyanto/steganography/internal/service"
+	"github.com/gin-gonic/gin"
 	"log"
-	"os"
-
-	"github.com/fajarardiyanto/steganography/pkg/bimg"
+	"net/http"
 )
 
-const inputFile = "file/input.pdf"
-const destTwo = "file/inject_two.jpg"
-
-func main() {
-	removeMetadata()
+func init() {
+	config.GoogleCloudStorage()
 }
 
-func removeMetadata() {
-	buffer, err := bimg.Read(inputFile)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-	}
+func main() {
+	r := gin.Default()
 
-	imgs := bimg.NewImage(buffer)
-	size, _ := imgs.Size()
-	imgt := imgs.Type()
-	newImage, err := imgs.
-		Process(bimg.Options{
-			RemoveAllMetaData: true,
-			StripMetadata:     true,
-			Width:             size.Width,
-			Height:            size.Height,
-			Embed:             true,
-			Quality:           50,
-			Compression:       9,
-			Interpolator:      bimg.Bilinear,
-			Trim:              true,
-			Type:              bimg.PNG,
-			NoProfile:         true,
+	svc := service.New()
+
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "pong",
 		})
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return
-	}
-
-	imgType := bimg.PNG
-	switch imgt {
-	case bimg.ImageTypeName(bimg.JPEG):
-		imgType = bimg.JPEG
-	case bimg.ImageTypeName(bimg.PDF):
-		bf, err := bimg.NewImage(newImage).ConvertPage(bimg.JPEG, 5)
-		if err != nil {
-			log.Printf("error processing data: %v", err)
-			return
-		}
-
-		if err = bimg.Write(destTwo, bf); err != nil {
-			log.Printf("error write file pdf: %v", err)
-			return
-		}
-
-		return
-	}
-
-	dat, err := bimg.NewImage(newImage).Process(bimg.Options{
-		Type:              imgType,
-		RemoveAllMetaData: true,
-		Trim:              true,
-		StripMetadata:     true,
-		NoProfile:         true,
-		Embed:             true,
-		Compression:       9,
-		Quality:           50,
 	})
-	if err != nil {
-		log.Printf("error processing data: %v", err)
-		return
-	}
 
-	if err = bimg.Write(destTwo, dat); err != nil {
-		log.Printf("error write file image: %v", err)
+	r.POST("/api/document", svc.RemoveMetadataService)
+
+	if err := r.Run(); err != nil {
+		log.Println("unable to connect port :8080")
 		return
 	}
 }

@@ -6,7 +6,6 @@ package bimg
 */
 import "C"
 import (
-	"fmt"
 	"unsafe"
 )
 
@@ -165,7 +164,6 @@ func ImageInterpretation(buf []byte) (Interpretation, error) {
 
 func applyRemoveAllMetadata(image *C.VipsImage) (*C.VipsImage, error) {
 	for _, s := range vipsGetAllMetadataKey(image) {
-		fmt.Println("metadata => ", s)
 		cstr := C.CString(s)
 		C.vips_image_remove(image, cstr)
 		C.free(unsafe.Pointer(cstr))
